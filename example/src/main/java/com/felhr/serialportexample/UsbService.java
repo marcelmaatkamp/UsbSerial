@@ -12,6 +12,7 @@ import android.hardware.usb.UsbManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
@@ -19,7 +20,10 @@ import com.felhr.usbserial.UsbSerialInterface;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UsbService extends Service {
 
@@ -37,7 +41,7 @@ public class UsbService extends Service {
     public static final int CTS_CHANGE = 1;
     public static final int DSR_CHANGE = 2;
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
-    private static final int BAUD_RATE = 9600; // BaudRate. Change this value if you need
+    private static final int BAUD_RATE = 115200; // BaudRate. Change this value if you need
     public static boolean SERVICE_CONNECTED = false;
 
     private IBinder binder = new UsbBinder();
@@ -55,26 +59,47 @@ public class UsbService extends Service {
      *  In this particular example. byte stream is converted to String and send to UI thread to
      *  be treated there.
      */
+
+    private String recvBuffer = "";
+
     private UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         @Override
         public void onReceivedData(byte[] arg0) {
-            try {
-                String data = new String(arg0, "UTF-8");
-                if (mHandler != null)
-                    mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, data).sendToTarget();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+            for (byte b : arg0) {
+                recvBuffer += new String(new byte[]{b});
+
+                if (b == '\n') {
+                    final Pattern pattern = Pattern.compile("<(.+?):(.+?)>");
+                    final Matcher matcher = pattern.matcher(recvBuffer);
+
+                    if (matcher.find()) {
+                        final String key = matcher.group(1);
+                        final String value = matcher.group(2);
+
+                        Intent intent = new Intent("xrip.serial.NEW_DATA");
+                        intent.putExtra("key", key);
+                        intent.putExtra("value", value);
+                        context.sendBroadcast(intent);
+
+                        if (mHandler != null) {
+                            mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "\r\n\r\nKey:" + key + "\r\n").sendToTarget();
+                            mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "Value:" + value + "\r\n").sendToTarget();
+                        }
+                    }
+                    recvBuffer = "";
+                }
             }
         }
-    };
 
+
+    };
     /*
      * State changes in the CTS line will be received here
      */
     private UsbSerialInterface.UsbCTSCallback ctsCallback = new UsbSerialInterface.UsbCTSCallback() {
         @Override
         public void onCTSChanged(boolean state) {
-            if(mHandler != null)
+            if (mHandler != null)
                 mHandler.obtainMessage(CTS_CHANGE).sendToTarget();
         }
     };
@@ -85,7 +110,7 @@ public class UsbService extends Service {
     private UsbSerialInterface.UsbDSRCallback dsrCallback = new UsbSerialInterface.UsbDSRCallback() {
         @Override
         public void onDSRChanged(boolean state) {
-            if(mHandler != null)
+            if (mHandler != null)
                 mHandler.obtainMessage(DSR_CHANGE).sendToTarget();
         }
     };
@@ -251,12 +276,12 @@ public class UsbService extends Service {
                     serialPort.read(mCallback);
                     serialPort.getCTS(ctsCallback);
                     serialPort.getDSR(dsrCallback);
-                    
+
                     //
                     // Some Arduinos would need some sleep because firmware wait some time to know whether a new sketch is going 
                     // to be uploaded or not
                     //Thread.sleep(2000); // sleep some. YMMV with different chips.
-                    
+
                     // Everything went as expected. Send an intent to MainActivity
                     Intent intent = new Intent(ACTION_USB_READY);
                     context.sendBroadcast(intent);
