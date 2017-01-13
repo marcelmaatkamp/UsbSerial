@@ -148,7 +148,7 @@ public class UsbService extends Service {
                 }
                 serialPortConnected = false;
             } else if (arg1.getAction().equals(ACTION_SEND_DATA)) {
-                String data = "<"+arg1.getExtras().getString("key")+":"+arg1.getExtras().getString("value")+">";
+                final String data = "<"+arg1.getExtras().getString("key")+":"+arg1.getExtras().getString("value")+">";
                 write(data.getBytes(StandardCharsets.US_ASCII));
             }
         }
