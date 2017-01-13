@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
@@ -16,15 +15,13 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,6 +43,8 @@ public class UsbService extends Service {
     public static final int DSR_CHANGE = 2;
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
     private static final int BAUD_RATE = 115200; // BaudRate. Change this value if you need
+    public static final String ACTION_SEND_DATA = "citroen.serial.SEND_DATA";
+    public static final String ACTION_RECV_DATA = "citroen.serial.RECV_DATA";
     public static boolean SERVICE_CONNECTED = false;
 
     private IBinder binder = new UsbBinder();
@@ -80,7 +79,7 @@ public class UsbService extends Service {
                         final String key = matcher.group(1);
                         final String value = matcher.group(2);
 
-                        Intent intent = new Intent("xrip.serial.NEW_DATA");
+                        Intent intent = new Intent(ACTION_RECV_DATA);
                         intent.putExtra("key", key);
                         intent.putExtra("value", value);
                         context.sendBroadcast(intent);
@@ -148,6 +147,9 @@ public class UsbService extends Service {
                     serialPort.close();
                 }
                 serialPortConnected = false;
+            } else if (arg1.getAction().equals(ACTION_SEND_DATA)) {
+                String data = "<"+arg1.getExtras().getString("key")+":"+arg1.getExtras().getString("value")+">";
+                write(data.getBytes(StandardCharsets.US_ASCII));
             }
         }
     };
@@ -272,6 +274,22 @@ public class UsbService extends Service {
         }
     }
 
+
+    public class CitroenBroadcastReceiver extends BroadcastReceiver {
+
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case "android.intent.action.BOOT_COMPLETE": // Boot completed
+                    context.startService(new Intent(context, UsbService.class));
+                    break;
+                case "citroen.serial.SEND_DATA": // Someone try to send data via intent
+
+//                usbService.write();;
+                    break;
+            }
+        }
+
+    }
     /*
      * A simple thread to open a serial port.
      * Although it should be a fast operation. moving usb operations away from UI thread is a good thing.
