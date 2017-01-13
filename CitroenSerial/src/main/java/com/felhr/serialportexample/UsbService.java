@@ -172,8 +172,7 @@ public class UsbService extends Service {
         findSerialPortDevice();
 
         Notification.Builder builder = new Notification.Builder(this)
-                .setSmallIcon(R.mipmap.icon)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.icon))
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("Citroen CAN service");
 
         Notification notification;

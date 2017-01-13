@@ -10,7 +10,7 @@
 
     <TextView
         android:id="@+id/textViewTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
@@ -22,21 +22,10 @@
         style="@style/Widget.AppCompat.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/sendButton"
+        android:text="Послать"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true" />
-
-    <EditText
-        android:id="@+id/editText1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:layout_above="@+id/buttonSend"
         android:layout_alignParentStart="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1">
-
-        <requestFocus/>
-    </EditText>
+        android:elevation="0dp" />
 
     <TextView
         android:id="@+id/textView1"
@@ -46,6 +35,17 @@
         android:scrollbars="vertical"
         android:gravity="bottom"
         android:layout_below="@+id/textViewTitle"
-        android:layout_alignParentStart="true"
-        android:layout_above="@+id/editText1" />
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:layout_above="@+id/buttonSend"
+        android:layout_alignParentStart="true">
+
+        <requestFocus/>
+    </EditText>
 </RelativeLayout>
