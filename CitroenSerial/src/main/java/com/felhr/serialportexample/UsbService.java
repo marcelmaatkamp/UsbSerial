@@ -173,7 +173,7 @@ public class UsbService extends Service {
 
         Notification.Builder builder = new Notification.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("Citroen CAN service");
+                .setContentTitle("Citroen Serial service");
 
         Notification notification;
 
