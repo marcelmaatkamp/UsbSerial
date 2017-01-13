@@ -15,6 +15,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
@@ -83,6 +84,7 @@ public class UsbService extends Service {
                         intent.putExtra("key", key);
                         intent.putExtra("value", value);
                         context.sendBroadcast(intent);
+                        Log.d("citroen_log", "Received data from serial: "+recvBuffer);
 
                         if (mHandler != null) {
                             mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "==================\r\nKey:" + key + " Value"+ value + "\r\n").sendToTarget();
@@ -148,7 +150,9 @@ public class UsbService extends Service {
                 }
                 serialPortConnected = false;
             } else if (arg1.getAction().equals(ACTION_SEND_DATA)) {
-                final String data = "<"+arg1.getExtras().getString("key")+":"+arg1.getExtras().getString("value")+">";
+
+                final String data = "<"+arg1.getStringExtra("key")+":"+arg1.getStringExtra("value")+">";
+                Log.d("citroen_log", "Writing data to serial: "+data);
                 write(data.getBytes(StandardCharsets.US_ASCII));
             }
         }
@@ -257,6 +261,7 @@ public class UsbService extends Service {
         filter.addAction(ACTION_USB_PERMISSION);
         filter.addAction(ACTION_USB_DETACHED);
         filter.addAction(ACTION_USB_ATTACHED);
+        filter.addAction(ACTION_SEND_DATA);
         registerReceiver(usbReceiver, filter);
     }
 
@@ -274,22 +279,6 @@ public class UsbService extends Service {
         }
     }
 
-
-    public class CitroenBroadcastReceiver extends BroadcastReceiver {
-
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case "android.intent.action.BOOT_COMPLETE": // Boot completed
-                    context.startService(new Intent(context, UsbService.class));
-                    break;
-                case "citroen.serial.SEND_DATA": // Someone try to send data via intent
-
-//                usbService.write();;
-                    break;
-            }
-        }
-
-    }
     /*
      * A simple thread to open a serial port.
      * Although it should be a fast operation. moving usb operations away from UI thread is a good thing.
