@@ -84,7 +84,7 @@ public class UsbService extends Service {
                         intent.putExtra("key", key);
                         intent.putExtra("value", value);
                         context.sendBroadcast(intent);
-                        Log.d("citroen_log", "Received data from serial: "+recvBuffer);
+                        Log.d("citroen_log", "Received data from serial: <"+key+":"+value+">");
 
                         if (mHandler != null) {
                             mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "==================\r\nKey:" + key + " Value"+ value + "\r\n").sendToTarget();
