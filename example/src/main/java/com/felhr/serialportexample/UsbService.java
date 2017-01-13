@@ -1,5 +1,6 @@
 package com.felhr.serialportexample;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -10,6 +11,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -82,8 +84,7 @@ public class UsbService extends Service {
                         context.sendBroadcast(intent);
 
                         if (mHandler != null) {
-                            mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "\r\n\r\nKey:" + key + "\r\n").sendToTarget();
-                            mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "Value:" + value + "\r\n").sendToTarget();
+                            mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "==================\r\nKey:" + key + " Value"+ value + "\r\n").sendToTarget();
                         }
                     }
                     recvBuffer = "";
@@ -161,6 +162,21 @@ public class UsbService extends Service {
         setFilter();
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         findSerialPortDevice();
+
+
+        Notification.Builder builder = new Notification.Builder(this)
+                .setContentTitle("Citroen CAN service")
+                .setSmallIcon(R.mipmap.icon);
+        Notification notification;
+
+        if (Build.VERSION.SDK_INT < 16)
+            notification = builder.getNotification();
+        else
+            notification = builder.build();
+
+        startForeground(5565, notification);
+/*        Intent hideIntent = new Intent(this, HideNotificationService.class);
+        startService(hideIntent);*/
     }
 
     /* MUST READ about services
