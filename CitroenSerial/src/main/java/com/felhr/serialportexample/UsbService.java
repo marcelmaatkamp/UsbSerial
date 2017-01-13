@@ -176,11 +176,7 @@ public class UsbService extends Service {
                 .setContentTitle("Citroen Serial service");
 
         Notification notification;
-
-        if (Build.VERSION.SDK_INT < 16)
-            notification = builder.getNotification();
-        else
-            notification = builder.build();
+        notification = builder.build();
 
 
 
