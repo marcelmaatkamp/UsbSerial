@@ -7,6 +7,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
@@ -163,16 +165,19 @@ public class UsbService extends Service {
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         findSerialPortDevice();
 
-
         Notification.Builder builder = new Notification.Builder(this)
-                .setContentTitle("Citroen CAN service")
-                .setSmallIcon(R.mipmap.icon);
+                .setSmallIcon(R.mipmap.icon)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.icon))
+                .setContentTitle("Citroen CAN service");
+
         Notification notification;
 
         if (Build.VERSION.SDK_INT < 16)
             notification = builder.getNotification();
         else
             notification = builder.build();
+
+
 
         startForeground(5565, notification);
 /*        Intent hideIntent = new Intent(this, HideNotificationService.class);
