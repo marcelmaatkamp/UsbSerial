@@ -31,6 +31,7 @@ public class PacketsHandler {
     Map<Integer, PacketHandler> handlers;
 
     public PacketsHandler() {
+        handlers.put(0x1A1, new InfoMessage());
         handlers.put(0x2A5, new RDSTitle());
     }
 
