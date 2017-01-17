@@ -7,12 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -24,8 +22,9 @@ import com.felhr.usbserial.UsbSerialInterface;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import xrip.Packet;
+import xrip.PacketsHandler;
 
 public class UsbService extends Service {
 
@@ -49,6 +48,7 @@ public class UsbService extends Service {
     public static boolean SERVICE_CONNECTED = false;
 
     private IBinder binder = new UsbBinder();
+    private PacketsHandler packetsHandler =  new PacketsHandler();
 
     private Context context;
     private Handler mHandler;
@@ -72,24 +72,19 @@ public class UsbService extends Service {
             for (byte b : arg0) {
                 recvBuffer += new String(new byte[]{b});
 
-                if (b == '\n') {
-                    final Pattern pattern = Pattern.compile("<(.+?):(.+?)>");
-                    final Matcher matcher = pattern.matcher(recvBuffer);
+                if (b == '\r') {
+                    Log.d("citroen_log", "Received data from serial: " + recvBuffer);
+                    try {
+                        Packet packet = new Packet(recvBuffer);
+                        packetsHandler.Handle(packet);
 
-                    if (matcher.find()) {
-                        final String key = matcher.group(1);
-                        final String value = matcher.group(2);
-
-                        Intent intent = new Intent(ACTION_RECV_DATA);
-                        intent.putExtra("key", key);
-                        intent.putExtra("value", value);
-                        context.sendBroadcast(intent);
-                        Log.d("citroen_log", "Received data from serial: <"+key+":"+value+">");
-
-                        if (mHandler != null) {
-                            mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "==================\r\nKey:" + key + " Value"+ value + "\r\n").sendToTarget();
-                        }
+                    } catch (Exception e) {
+//                        Log.d("citroen_log", e.getMessage());
                     }
+                    if (mHandler != null) {
+                            mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "==================\r\n"+recvBuffer+"\r\n").sendToTarget();
+                        }
+
                     recvBuffer = "";
                 }
             }
