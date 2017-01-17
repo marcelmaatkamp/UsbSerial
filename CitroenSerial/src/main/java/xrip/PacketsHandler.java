@@ -28,7 +28,7 @@ public class PacketsHandler {
         }
     }
 
-    Map<Integer, PacketHandler> handlers;
+    Map<Integer, PacketHandler> handlers = new HashMap<Integer, PacketHandler>();;
 
     public PacketsHandler() {
         handlers.put(0x1A1, new InfoMessage());
