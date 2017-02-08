@@ -1,18 +1,17 @@
-package xrip;
+package com.xrip;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.felhr.serialportexample.MainActivity;
-import com.felhr.serialportexample.UsbService;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static android.R.id.content;
-
 public class PacketsHandler {
+    public Context context;
     interface PacketHandler {
         void run(Packet packet);
     }
@@ -27,18 +26,17 @@ public class PacketsHandler {
     class RDSTitle implements PacketHandler {
         @Override
         public void run(Packet packet) {
-            Log.e("citroen_log", "RDS Title: "+packet.asString());
+            String RDSTitle = packet.toString();
+            Log.e("citroen_log", "RDS Title: "+ RDSTitle);
         }
     }
 
     class InfoMessage implements PacketHandler {
         @Override
         public void run(Packet packet) {
-            try {
-                Log.d("citroen_log", "Information Message: "+String.format("0x%02X", (int) packet.byteAt(1) ));
-            } catch (Exception e) {
-//                e.printStackTrace();
-            }
+            String Message = packet.toString();
+                Log.d("citroen_log", "Information Message: "+Message);
+
         }
     }
 
@@ -52,7 +50,10 @@ public class PacketsHandler {
     }
 
     public void Handle(Packet packet) throws Exception {
-        PacketHandler handler = handlers.get(packet.id);
+        PacketHandler handler = handlers.get(packet.getId());
+        Toast.makeText(context.getApplicationContext(),
+               "test",
+                Toast.LENGTH_SHORT).show();
         if (handler != null) {
             handler.run(packet);
         } else {

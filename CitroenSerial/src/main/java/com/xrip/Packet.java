@@ -1,4 +1,6 @@
-package xrip;
+package com.xrip;
+
+import com.Hex;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,7 +12,7 @@ import java.util.regex.Pattern;
 
 public class Packet {
 
-    public int id;
+    private int id;
     private int lenght;
     private String data;
     private byte[] dataBytes;
@@ -30,6 +32,11 @@ public class Packet {
 
     }
 
+    public int getId()
+    {
+        return id;
+    }
+
     public byte byteAt(int i) throws Exception {
         if (i <= lenght) {
             return dataBytes[i];
@@ -42,7 +49,7 @@ public class Packet {
         return (Bit & 1 << Byte) != 0;
     }
 
-    public String asString(){
+    public String toString(){
         return new String(dataBytes);
     }
 

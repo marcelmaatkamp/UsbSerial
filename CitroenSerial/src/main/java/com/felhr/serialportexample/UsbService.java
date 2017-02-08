@@ -23,8 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import xrip.Packet;
-import xrip.PacketsHandler;
+import com.xrip.Packet;
+import com.xrip.PacketsHandler;
 
 public class UsbService extends Service {
 
@@ -68,19 +68,19 @@ public class UsbService extends Service {
 
     private UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         @Override
-        public void onReceivedData(byte[] arg0) {
+        public void onReceivedData(byte[] arg0)  {
             for (byte b : arg0) {
                 recvBuffer += new String(new byte[]{b});
 
                 if (b == '\r') {
                     Log.d("citroen_log", "Received data from serial: " + recvBuffer);
-                    try {
-                        Packet packet = new Packet(recvBuffer);
-                        packetsHandler.Handle(packet);
 
+                    try {
+                        packetsHandler.Handle(new Packet(recvBuffer));
                     } catch (Exception e) {
-//                        Log.d("citroen_log", e.getMessage());
+                        e.printStackTrace();
                     }
+
                     if (mHandler != null) {
                             mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "==================\r\n"+recvBuffer+"\r\n").sendToTarget();
                         }
