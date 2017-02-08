@@ -22,7 +22,7 @@ public class Packet {
         final Matcher matcher = pattern.matcher(packet);
 
         if (matcher.find()) {
-            id = Integer.decode("0x"+matcher.group(2));
+            id = Integer.decode(matcher.group(2));
             lenght = Integer.decode(matcher.group(3));
             data = matcher.group(4);
             dataBytes = Hex.hexStringToByteArray(data);

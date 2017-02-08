@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PacketsHandler {
-    public Context context;
+
     interface PacketHandler {
         void run(Packet packet);
     }
@@ -51,9 +51,7 @@ public class PacketsHandler {
 
     public void Handle(Packet packet) throws Exception {
         PacketHandler handler = handlers.get(packet.getId());
-        Toast.makeText(context.getApplicationContext(),
-               "test",
-                Toast.LENGTH_SHORT).show();
+
         if (handler != null) {
             handler.run(packet);
         } else {
