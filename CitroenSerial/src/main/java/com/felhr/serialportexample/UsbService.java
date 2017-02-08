@@ -23,8 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.xrip.Packet;
-import com.xrip.PacketsHandler;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UsbService extends Service {
 
@@ -48,7 +48,6 @@ public class UsbService extends Service {
     public static boolean SERVICE_CONNECTED = false;
 
     private IBinder binder = new UsbBinder();
-    private PacketsHandler packetsHandler =  new PacketsHandler();
 
     private Context context;
     private Handler mHandler;
@@ -72,19 +71,23 @@ public class UsbService extends Service {
             for (byte b : arg0) {
                 recvBuffer += new String(new byte[]{b});
 
-                if (b == '\r') {
-                    Log.d("citroen_log", "Received data from serial: " + recvBuffer);
+                if (b == '\n') {
+                    final Pattern pattern = Pattern.compile("<(.+?):(.+?)>");
+                    final Matcher matcher = pattern.matcher(recvBuffer);
 
-                    try {
-                        packetsHandler.Handle(new Packet(recvBuffer));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    if (matcher.find()) {
+                        final String key = matcher.group(1);
+                        final String value = matcher.group(2);
 
-                    if (mHandler != null) {
-                            mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "==================\r\n"+recvBuffer+"\r\n").sendToTarget();
+                        Intent intent = new Intent(ACTION_RECV_DATA);
+                        intent.putExtra("key", key);
+                        intent.putExtra("value", value);
+                        context.sendBroadcast(intent);
+
+                        if (mHandler != null) {
+                            mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, "==================\r\nKey:" + key + " Value"+ value + "\r\n").sendToTarget();
                         }
-
+                    }
                     recvBuffer = "";
                 }
             }
