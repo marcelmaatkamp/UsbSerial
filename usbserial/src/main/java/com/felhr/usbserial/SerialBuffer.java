@@ -158,6 +158,7 @@ public class SerialBuffer
         public synchronized void reset()
         {
             position = -1;
+            notify();
         }
     }
 

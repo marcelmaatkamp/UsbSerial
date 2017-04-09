@@ -185,6 +185,8 @@ TO-DO
 
 
 
-
-
+SDK:  ~/Library/Android/sdk
+NDK:  ~/Library/Android/sdk/ndk-bundle
+ADB:  adb connect 192.168.178.10
+Gradle: /usr/local/Cellar/gradle/3.4.1/libexec
 
